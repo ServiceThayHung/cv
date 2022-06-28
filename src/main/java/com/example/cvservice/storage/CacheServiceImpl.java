@@ -64,4 +64,11 @@ public class CacheServiceImpl implements CacheService {
             e.printStackTrace();
         }
     }
+
+    @Override
+    public void delete() {
+        File file = new File(root.toFile(), "id.txt");
+        
+        file.delete();
+    }
 }

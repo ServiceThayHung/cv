@@ -14,4 +14,5 @@ public interface CacheService {
     void init();
     void save(int number) throws IOException;
     int read();
+    void delete();
 }

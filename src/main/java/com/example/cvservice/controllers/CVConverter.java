@@ -1,5 +1,6 @@
 package com.example.cvservice.controllers;
 
+import com.example.cvservice.models.ConvertResult;
 import com.example.cvservice.models.Metadata;
 
 /*
@@ -59,6 +60,33 @@ public class CVConverter {
         }
     
         return metadata;
+    }
+
+    @GetMapping("/getall/{id}")
+    public ConvertResult extractCV(@PathVariable int id) {
+        ConvertResult res = new ConvertResult();
+
+        Metadata metadata = new Metadata();
+
+        String fileName = String.format("%s.%s", id + "", "pdf");
+
+        String content = convertPDFtoText(storageService.load(fileName).toFile());
+
+        // find email with regex
+        String regex = "[a-z0-9!#$%&'*+/=?^_`\\{|\\}~-]+(?:\\.[a-z0-9!#$%&'*+/=?^_`\\{|\\}~-]+)*@(?:[a-z0-9](?:[a-z0-9-]*[a-z0-9])?\\.)+[a-z0-9](?:[a-z0-9-]*[a-z0-9])?";
+        Pattern pattern = Pattern.compile(regex);
+        Matcher matcher = pattern.matcher(content);
+
+        System.out.println(content);
+
+        if(matcher.find()) {
+            metadata.email = content.substring(matcher.start(), matcher.end());        
+        }
+    
+        res.content = content;
+        res.metadata = metadata;
+
+        return res;
     }
 
     private String convertPDFtoText(final File file) {
