@@ -7,6 +7,7 @@ package com.example.cvservice;
 import org.springframework.boot.CommandLineRunner;
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
+import org.springframework.cloud.netflix.eureka.EnableEurekaClient;
 import org.springframework.context.annotation.Bean;
 import org.springframework.scheduling.annotation.EnableAsync;
 
@@ -19,12 +20,13 @@ import com.example.cvservice.storage.StorageService;
  */
 @SpringBootApplication
 @EnableAsync
+@EnableEurekaClient
 public class Application {
 
     public static void main(String[] args) {
         SpringApplication.run(Application.class, args);
     }
-    
+
     @Bean
     CommandLineRunner init(CacheService cacheService, StorageService storageService) {
         return (args) ->{
