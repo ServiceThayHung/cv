@@ -5,11 +5,13 @@
 package com.example.cvservice.controllers;
 
 import com.example.cvservice.models.FileInfo;
+import com.example.cvservice.models.Pair;
 import com.example.cvservice.models.ResponseMessage;
 import com.example.cvservice.storage.CacheService;
 import com.example.cvservice.storage.StorageService;
 import java.io.IOException;
 import java.nio.file.FileAlreadyExistsException;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.stream.Collectors;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -55,10 +57,10 @@ public class FileUploadController {
         return ResponseEntity.status(HttpStatus.OK).body(fileInfos);
     }
 
-    @GetMapping("/files/{filename:.+}")
+    @GetMapping("/files/{id}")
     @ResponseBody
-    public ResponseEntity<Resource> serveFile(@PathVariable String filename) {
-        Resource file = storageService.loadAsResource(filename);
+    public ResponseEntity<Resource> serveFile(@PathVariable int id) {
+        Resource file = storageService.loadAsResource(id + ".pdf");
         return ResponseEntity.ok().header(HttpHeaders.CONTENT_DISPOSITION,
                         "attachment; filename=\"" + file.getFilename() + "\"").body(file);
     }
@@ -80,6 +82,33 @@ public class FileUploadController {
         }
         
         return new ResponseMessage("Upload failed", -1);
+    }
+
+    @PostMapping("/uploads")
+    public List<ResponseMessage> handleFileUpload(@RequestParam("files") MultipartFile[] files) {
+        List<ResponseMessage> res = new ArrayList<>();
+        
+        for(MultipartFile file : files) {
+            try {
+                int id = cacheService.read() + 1;
+                
+                storageService.store(file, String.format("%s.%s", id + "", "pdf"));
+                
+                cacheService.save(id);
+    
+                res.add(new ResponseMessage("Upload successful", id));
+                
+                continue;
+            } catch(FileAlreadyExistsException e) {
+                e.printStackTrace();
+            } catch(IOException ioe) {
+                ioe.printStackTrace();
+            } 
+
+            res.add(new ResponseMessage("Upload failed", -1));
+        }
+
+        return res;
     }
 
     @DeleteMapping("/deleteAll")

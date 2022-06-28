@@ -57,6 +57,7 @@ public class StorageServiceImpl implements StorageService {
     public void deleteAll() {
         FileSystemUtils.deleteRecursively(root.toFile());
     }
+    
     @Override
     public Stream<Path> loadAll() {
         try {
